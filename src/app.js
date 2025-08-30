@@ -5,56 +5,77 @@ import hpp from 'hpp';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import { isProd } from './config/env.config.js';
+import { isProd, jwtSecret } from './config/env.config.js';
 import logger from './utils/logger.js';
 import compression from 'compression';
 import router from './routes/index.js';
+import session from 'express-session';
 import errorHandler from './middlewares/error.handler.middleware.js';
 const app = express();
 
-// /** Hide tech stack */
-// app.disabled('x-powered-by');
+import passport from 'passport';
+import './config/passport-local-strategy.js';
 
-// /** When behind reverse proxies, trust proxy for corrsct IPs */
-// app.set('trust proxy', 1);
+/** Hide tech stack */
+app.disabled('x-powered-by');
 
-// /** Middleware for request context ID */
-// // app.use(requestContext)
+/** When behind reverse proxies, trust proxy for corrsct IPs */
+app.set('trust proxy', 1);
 
-// /** Setting security headers as expres does not */
-// app.use(
-//   helmet({
-//     crossOriginResourcePolicy: { policy: 'cross-origin' },
-//   }),
-// );
+/** Middleware for request context ID */
+// app.use(requestContext)
 
-// /** Telling browser which extrenal origins can talk to your APIs */
-// app.use(
-//   cors({
-//     origin: true,
-//     credentials: true,
-//     allowedHeaders: ['Content-Type', 'Authorization'],
-//     maxAge: 600,
-//     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-//   }),
-// );
+/** Setting security headers as expres does not */
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }),
+);
 
-// /** Protection from html paramater pollution */
-// app.use(hpp());
+/** Telling browser which extrenal origins can talk to your APIs */
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    maxAge: 600,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  }),
+);
 
-// /** Basic rate limit to protect against spam */
-// const limiter = rateLimit({
-//   legacyHeaders: false,
-//   standardHeaders: true,
-//   limit: 100,
-//   windowMs: 15 * 60 * 1000,
-// });
-// app.use(limiter);
+/** Protection from html paramater pollution */
+app.use(hpp());
+
+/** Basic rate limit to protect against spam */
+const limiter = rateLimit({
+  legacyHeaders: false,
+  standardHeaders: true,
+  limit: 100,
+  windowMs: 15 * 60 * 1000,
+});
+app.use(limiter);
 
 /** Body Parsers */
-app.use(cookieParser);
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.use(
+  session({
+    secret: jwtSecret,
+    resave: false,
+    saveUninitialized: false,
+    // store: {},
+    cookie: {
+      secure: isProd,
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    },
+  }),
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 /** Morgan - for request logging middlware */
 /** Pipes to winston in prod, otherwise dev-friendly logging in console */
@@ -72,19 +93,13 @@ app.use(
 /** Compress HTTP response before they are sent to client */
 app.use(compression());
 
-app.get('/', (_req, res) => {
-  return res.status(200).json({
-    status: 'home',
-  });
-});
-
 app.get('/health', (_req, res) => {
   return res.status(200).json({
     status: 'ok',
   });
 });
 
-// app.use(router);
+app.use(router);
 
 app.use((req, res) => {
   return res.status(404).json({

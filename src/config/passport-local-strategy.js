@@ -1,10 +1,11 @@
 import passport from 'passport';
-import { Strategy } from 'passport-local';
+import { Strategy as LocalStrategy } from 'passport-local';
 import { User } from '../models/index.js';
 import logger from '../utils/logger.js';
 
 passport.use(
-  new Strategy(
+  'local',
+  new LocalStrategy(
     {
       usernameField: 'email',
       passwordField: 'password',
@@ -15,8 +16,8 @@ passport.use(
       try {
         const user = await User.findOne({ email }).select('+password');
         if (!user || !(await user.comparePassword(password))) {
-          logger.error('Invalid credentials');
-          return done(null, false);
+          logger.error('Invalid credentials!!!');
+          return done(null, false, { message: 'Invalid credentials!!!' });
         }
         return done(null, user);
       } catch (error) {
@@ -26,22 +27,20 @@ passport.use(
   ),
 );
 
+// Serialize user for session storage
 /** Serialize the user to decide which key to be kept in the cookies */
 passport.serializeUser((user, done) => {
-  done(null, user.email);
+  done(null, user._id); // Store only user ID in session
 });
 
+// Deserialize user from session
 /** deserialize the user from the key in the cookies */
-passport.deserializeUser(async (email, done) => {
+passport.deserializeUser(async (id, done) => {
   try {
-    const user = await User.findOne({ email });
-    if (user) {
-      return done(null, user);
-    } else {
-      return done(null, false);
-    }
+    const user = await User.findById(id);
+    done(null, user);
   } catch (error) {
-    return done(error);
+    done(error);
   }
 });
 
@@ -49,14 +48,10 @@ passport.checkAuthentication = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
   }
-  return res.redirect('/auth/login');
-};
-
-passport.setAuthenticatedUser = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    res.json({ user: req.user });
-  }
-  next();
+  return res.status(401).json({
+    authenticated: false,
+    message: 'Not authenticated',
+  });
 };
 
 export default passport;
