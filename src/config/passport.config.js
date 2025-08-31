@@ -21,7 +21,7 @@ passport.use(
   new LocalStrategy(
     {
       usernameField: 'email',
-      // NOSONAR
+      // sonarignore: This is just a field name, not a hardcoded password
       passwordField: 'password',
       passReqToCallback: false,
     },
