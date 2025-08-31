@@ -1,4 +1,5 @@
 import ms from 'ms';
+
 import { isProd, refreshTokenExpiry } from '../config/env.config.js';
 
 export const setRefreshCookie = (res, token) => {

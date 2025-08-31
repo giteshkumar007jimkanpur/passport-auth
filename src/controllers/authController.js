@@ -1,4 +1,5 @@
 import ms from 'ms';
+
 import { accessTokenExpiry } from '../config/env.config.js';
 import { User } from '../models/index.js';
 import { authService } from '../services/index.js';
@@ -185,13 +186,17 @@ export const logout = async (req, res) => {
 
     if (req.session && !req.session.regenerate) {
       req.session.regenerate = function (callback) {
-        if (callback) callback();
+        if (callback) {
+          callback();
+        }
       };
     }
 
     if (req.session && !req.session.save) {
       req.session.save = function (callback) {
-        if (callback) callback();
+        if (callback) {
+          callback();
+        }
       };
     }
 

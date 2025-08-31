@@ -150,7 +150,6 @@ export const requireSession = (req, res, next) => {
 /** JWT authentication middleware */
 export const requireJWT = (req, res, next) => {
   try {
-    console.log(`req.isAuthenticated()`, req.isAuthenticated());
     const authHeader = req.headers.authorization || '';
     if (!authHeader.startsWith('Bearer')) {
       return res.status(401).json({
@@ -165,7 +164,6 @@ export const requireJWT = (req, res, next) => {
       id: payload.sub,
       jti: payload.jti,
     };
-    console.log(`req.isAuthenticated()`, req.isAuthenticated());
 
     next();
   } catch (error) {
@@ -197,30 +195,6 @@ export const requireAuth = (req, res, next) => {
     return next();
   }
   return requireJWT(req, res, next);
-};
-
-/** Optional auth middleware - doesn't fail if not authenticated */
-export const optionalAuth = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  // Try JWT silently
-  try {
-    const authHeader = req.headers.authorization || '';
-    if (authHeader?.startsWith('Bearer')) {
-      const accessToken = authHeader.split(' ')[1];
-      const payload = verifyAccessToken(accessToken);
-      req.user = {
-        email: payload.email,
-        id: payload.sub,
-        jti: payload.jti,
-      };
-    }
-  } catch (_error) {
-    // Silently ignore auth errors in optional auth
-  }
-
-  next();
 };
 
 export default passport;

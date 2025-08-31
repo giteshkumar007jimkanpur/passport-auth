@@ -88,7 +88,7 @@ export const rotateRefreshToken = async (token, meta = {}) => {
       throw err;
     }
   }
-  console.log(`existing.isActive`, existing.isActive);
+
   if (!existing.isActive) {
     const err = new Error('Refresh token not active');
     err.status = 401;
