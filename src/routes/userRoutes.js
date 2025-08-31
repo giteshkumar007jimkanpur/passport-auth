@@ -36,7 +36,6 @@ router.get('/profile', requireAuth, (req, res) => {
     success: true,
     message: 'Protected route accessed',
     user: req.user,
-    authMethod: req.isAuthenticated() ? 'Session' : 'JWT',
   });
 });
 

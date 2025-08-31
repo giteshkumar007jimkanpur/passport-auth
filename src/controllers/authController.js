@@ -128,6 +128,8 @@ export const googleCallback = async (req, res) => {
     });
 
     setRefreshCookie(res, tokens.refreshToken);
+    const successUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/users/me`;
+    return res.redirect(successUrl);
   } catch (error) {
     logger.error('Google callback error:', error);
     const errorUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/error`;
@@ -181,7 +183,18 @@ export const logout = async (req, res) => {
       }
     }
 
-    // Handle Passport logout
+    if (req.session && !req.session.regenerate) {
+      req.session.regenerate = function (callback) {
+        if (callback) callback();
+      };
+    }
+
+    if (req.session && !req.session.save) {
+      req.session.save = function (callback) {
+        if (callback) callback();
+      };
+    }
+
     if (req.logout) {
       req.logout((err) => {
         if (err) {
@@ -190,14 +203,6 @@ export const logout = async (req, res) => {
       });
     }
 
-    // Destroy session
-    if (req.session) {
-      req.session.destroy((err) => {
-        if (err) {
-          logger.error('Session destroy error:', err);
-        }
-      });
-    }
     clearRefreshCookie(res);
 
     res.clearCookie('sessionId');

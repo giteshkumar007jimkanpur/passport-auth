@@ -3,10 +3,10 @@ import Joi from 'joi';
 const passwordRules = Joi.string()
   .min(8)
   .max(128)
-  .pattern(/['a-z']/, 'lowercase')
-  .pattern(/['A-Z']/, 'uppercase')
+  .pattern(/[a-z]/, 'lowercase')
+  .pattern(/[A-Z]/, 'uppercase')
   .pattern(/\d/, 'digit')
-  .pattern(/['A-Za-z0-9']/, 'symbol')
+  .pattern(/[^A-Za-z0-9]/, 'symbol')
   .required()
   .messages({
     'string.min': 'Password must be atleast 8 characters long',

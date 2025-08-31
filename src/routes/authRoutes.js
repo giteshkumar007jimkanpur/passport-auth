@@ -53,7 +53,7 @@ router.post(
   validateRequest(authValidation.login),
   passport.authenticate('local', {
     failureRedirect: '/auth/login',
-    session: false,
+    session: true,
     failureRedirect: false,
   }),
   authController.loginWithPassport,

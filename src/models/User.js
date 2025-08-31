@@ -19,13 +19,12 @@ const UserSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
-    avater: {
+    avatar: {
       type: String,
       default: '',
     },
     googleId: {
       type: String,
-      sparse: true /** allow null but uniqueness when avaialable */,
     },
     provider: {
       type: String,
@@ -58,6 +57,7 @@ UserSchema.index(
 
 /** Unique contraint on googleId when present */
 UserSchema.index({ googleId: 1 }, { unique: true, sparse: true });
+/** sparse-  allow null but uniqueness when avaialable */
 
 /** Instance method to compare password */
 UserSchema.methods.comparePassword = function (password) {

@@ -60,7 +60,7 @@ RefreshTokenSchema.virtual('isExpired').get(function () {
 });
 
 RefreshTokenSchema.virtual('isActive').get(function () {
-  return !this.expiresAt && !this.isExpired;
+  return !this.revoked && !this.isExpired;
 });
 
 const RefreshToken = mongoose.model('RefreshToken', RefreshTokenSchema);
