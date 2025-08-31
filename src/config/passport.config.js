@@ -21,6 +21,7 @@ passport.use(
   new LocalStrategy(
     {
       usernameField: 'email',
+      // NOSONAR
       passwordField: 'password',
       passReqToCallback: false,
     },
@@ -182,12 +183,6 @@ export const requireJWT = (req, res, next) => {
     next(error);
   }
 };
-
-/** Passport JWT middleware (alternative approach) */
-export const requirePassportJWT = passport.authenticate('jwt', {
-  session: false,
-  failureRedirect: false,
-});
 
 /** Combined auth middleware - check both session and JWT */
 export const requireAuth = (req, res, next) => {

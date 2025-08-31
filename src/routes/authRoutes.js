@@ -52,7 +52,6 @@ router.post(
   loginLimiter,
   validateRequest(authValidation.login),
   passport.authenticate('local', {
-    failureRedirect: '/auth/login',
     session: true,
     failureRedirect: false,
   }),
