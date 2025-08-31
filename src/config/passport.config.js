@@ -55,7 +55,7 @@ passport.use(
     },
     async (payload, done) => {
       try {
-        if (payload !== 'access') {
+        if (payload.typ !== 'access') {
           return done(null, false, { message: 'Invalid token type' });
         }
         const user = await User.findById(payload.sub);
@@ -150,20 +150,23 @@ export const requireSession = (req, res, next) => {
 /** JWT authentication middleware */
 export const requireJWT = (req, res, next) => {
   try {
+    console.log(`req.isAuthenticated()`, req.isAuthenticated());
     const authHeader = req.headers.authorization || '';
-    console.log(`req.headers`, req.headers);
     if (!authHeader.startsWith('Bearer')) {
       return res.status(401).json({
         message: 'Access token missing or malformed',
       });
     }
     const accessToken = authHeader.split(' ')[1];
+
     const payload = verifyAccessToken(accessToken);
     req.user = {
       email: payload.email,
       id: payload.sub,
       jti: payload.jti,
     };
+    console.log(`req.isAuthenticated()`, req.isAuthenticated());
+
     next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {

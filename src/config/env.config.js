@@ -8,10 +8,10 @@ const envSchema = Joi.object({
   SESSION_SECRET: Joi.string().required(),
 
   ACCESS_TOKEN_SECRET: Joi.string().required(),
-  ACCESS_TOKEN_SECRET: Joi.string().default('15m'),
+  ACCESS_TOKEN_EXPIRY: Joi.string().default('15m'),
 
   REFRESH_TOKEN_SECRET: Joi.string().required(),
-  REFRESH_TOKEN_SECRET: Joi.string().default('7d'),
+  REFRESH_TOKEN_EXPIRY: Joi.string().default('7d'),
 
   JWT_AUDIENCE: Joi.string().default('advance-jwt-auth'),
   JWT_ISSUER: Joi.string().default('advance-jwt-auth-client'),
