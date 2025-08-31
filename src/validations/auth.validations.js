@@ -27,4 +27,11 @@ const login = Joi.object({
   password: Joi.string().required(),
 });
 
-export default { register, login };
+const refreshToken = Joi.object({
+  refreshToken: Joi.string().required().messages({
+    'any.required': 'Refresh token missing in cookies',
+    'string.empty': 'Refresh token cannot be empty',
+  }),
+});
+
+export default { register, login, refreshToken };

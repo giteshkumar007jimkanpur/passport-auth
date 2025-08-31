@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
-import logger from '../utils/logger.js';
+
 import { isProd } from './env.config.js';
+import logger from '../utils/logger.js';
 
 /** ignore query fields that is not in schema */
 mongoose.set('strictQuery', true);

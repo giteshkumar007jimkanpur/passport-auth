@@ -3,9 +3,9 @@
  */
 
 import app from './app.js';
+import connectDB from './config/db.config.js';
 import { mongoUri, port } from './config/env.config.js';
 import logger from './utils/logger.js';
-import connectDB from './config/db.config.js';
 
 let server;
 

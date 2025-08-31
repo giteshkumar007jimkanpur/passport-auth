@@ -1,4 +1,5 @@
 import { createLogger, transports, format } from 'winston';
+
 import { isProd } from '../config/env.config.js';
 
 const logger = createLogger({

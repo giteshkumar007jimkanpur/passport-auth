@@ -1,5 +1,3 @@
-import Joi from 'joi';
-
 const validateRequest = (schema) => (req, res, next) => {
   if (!req.body || typeof req.body !== 'object') {
     return res.status(400).json({

@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import mongoose from 'mongoose';
 
 const UserSchema = new mongoose.Schema(
   {
@@ -9,14 +9,32 @@ const UserSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    password: {
+    passwordHash: {
       type: String,
-      required: true,
+      required: false /** Made optional for OAuth users */,
+      select: false,
     },
     name: {
       type: String,
       trim: true,
       default: '',
+    },
+    avater: {
+      type: String,
+      default: '',
+    },
+    googleId: {
+      type: String,
+      sparse: true /** allow null but uniqueness when avaialable */,
+    },
+    provider: {
+      type: String,
+      enum: ['local', 'google'],
+      default: 'local',
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -24,6 +42,7 @@ const UserSchema = new mongoose.Schema(
     toJSON: {
       transform: (_doc, ret) => {
         delete ret.password;
+        delete ret.__v;
         return ret;
       },
     },
@@ -37,11 +56,22 @@ UserSchema.index(
   { collation: { locale: 'en', strength: 2 }, unique: true },
 );
 
+/** Unique contraint on googleId when present */
+UserSchema.index({ googleId: 1 }, { unique: true, sparse: true });
+
+/** Instance method to compare password */
 UserSchema.methods.comparePassword = function (password) {
-  return bcrypt.compare(String(password || ''), this.password);
+  if (!password) {
+    return false;
+  } /** OAuth users don't have password */
+  return bcrypt.compare(String(password || ''), this.passwordHash);
 };
 
+/** Static method to hash password */
 UserSchema.statics.hashPassword = function (password) {
+  if (!password) {
+    return null;
+  } /** OAuth users don't have password */
   const saltRounds = 12;
   return bcrypt.hash(String(password || ''), saltRounds);
 };

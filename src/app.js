@@ -1,20 +1,23 @@
-import express from 'express';
-import helmet from 'helmet';
-import cors from 'cors';
-import hpp from 'hpp';
-import rateLimit from 'express-rate-limit';
-import cookieParser from 'cookie-parser';
-import morgan from 'morgan';
-import { isProd, jwtSecret } from './config/env.config.js';
-import logger from './utils/logger.js';
 import compression from 'compression';
-import router from './routes/index.js';
+import MongoStore from 'connect-mongo';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import express from 'express';
+import rateLimit from 'express-rate-limit';
 import session from 'express-session';
+import helmet from 'helmet';
+import hpp from 'hpp';
+import morgan from 'morgan';
+import passport from 'passport';
+
+import { isProd, mongoUri, sessionSecret } from './config/env.config.js';
 import errorHandler from './middlewares/error.handler.middleware.js';
+import router from './routes/index.js';
+import logger from './utils/logger.js';
+
 const app = express();
 
-import passport from 'passport';
-import './config/passport-local-strategy.js';
+import './config/passport.config.js';
 
 /** Hide tech stack */
 app.disabled('x-powered-by');
@@ -62,14 +65,20 @@ app.use(express.json());
 
 app.use(
   session({
-    secret: jwtSecret,
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
-    // store: {},
+    name: 'sessionId',
+    store: MongoStore.create({
+      mongoUrl: mongoUri,
+      touchAfter: 24 * 3600, // Lazy session update
+      ttl: 24 * 60 * 60,
+    }),
     cookie: {
       secure: isProd,
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
+      sameSite: isProd ? 'strict' : 'lax',
     },
   }),
 );
@@ -104,6 +113,7 @@ app.use(router);
 app.use((req, res) => {
   return res.status(404).json({
     message: `Route not found ${req.method} ${req.originalUrl}`,
+    timestamp: new Date().toISOString(),
   });
 });
 
