@@ -13,8 +13,9 @@ const envSchema = Joi.object({
   REFRESH_TOKEN_SECRET: Joi.string().required(),
   REFRESH_TOKEN_EXPIRY: Joi.string().default('7d'),
 
-  JWT_AUDIENCE: Joi.string().default('advance-jwt-auth'),
-  JWT_ISSUER: Joi.string().default('advance-jwt-auth-client'),
+JWT_ISSUER: Joi.string().default('advance-jwt-auth'),
+JWT_AUDIENCE: Joi.string().default('advance-jwt-auth-client'),
+  
 
   GOOGLE_CLIENT_ID: Joi.string().required(),
   GOOGLE_CLIENT_SECRET: Joi.string().required(),
